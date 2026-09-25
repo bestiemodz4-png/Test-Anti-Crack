@@ -1068,12 +1068,64 @@ ipad_seekbar.setOnSeekBarChangeListener{
 
 }
 
+-- =========================================================
+-- CONFIG BUTTON CLICK ANIMATION
+-- =========================================================
+
+local function animateConfigButton(view)
+
+  if view == nil then
+    return
+  end
+
+  local down = ScaleAnimation(
+    1.0,
+    0.94,
+    1.0,
+    0.94,
+    Animation.RELATIVE_TO_SELF,
+    0.5,
+    Animation.RELATIVE_TO_SELF,
+    0.5
+  )
+
+  down.setDuration(90)
+  down.setFillAfter(true)
+
+
+  local up = ScaleAnimation(
+    0.94,
+    1.0,
+    0.94,
+    1.0,
+    Animation.RELATIVE_TO_SELF,
+    0.5,
+    Animation.RELATIVE_TO_SELF,
+    0.5
+  )
+
+  up.setDuration(120)
+  up.setStartOffset(90)
+
+
+  local animation = AnimationSet(true)
+
+  animation.addAnimation(down)
+  animation.addAnimation(up)
+
+  animation.setFillAfter(false)
+
+  view.startAnimation(animation)
+
+end
 
 -- =========================================================
--- BUTTON EVENTS
+-- CONFIG BUTTON EVENTS
 -- =========================================================
 
 function saveconfig.onClick()
+
+  animateConfigButton(saveconfig)
 
   saveConfig()
 
@@ -1082,6 +1134,8 @@ end
 
 function loadconfig.onClick()
 
+  animateConfigButton(loadconfig)
+
   loadConfig()
 
 end
@@ -1089,11 +1143,11 @@ end
 
 function resetconfig.onClick()
 
+  animateConfigButton(resetconfig)
+
   resetConfig()
 
 end
-
-
 -- =========================================================
 -- SAVE CONFIG
 -- =========================================================
