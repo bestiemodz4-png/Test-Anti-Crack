@@ -511,6 +511,51 @@ local ac, ic = 0xFF00FFEE, 0xFF888888
 local dens = activity.getResources().getDisplayMetrics().density
 
 -- =========================================================
+-- KAZE CYAN ENERGY BORDER
+-- TOP → RIGHT → BOTTOM → LEFT
+-- =========================================================
+
+local cyanViews = {
+  cyanTop,
+  cyanRight,
+  cyanBottom,
+  cyanLeft
+}
+
+local cyanIndex = 1
+local cyanHandler = Handler()
+local cyanRunning = true
+
+local function cyanLoop()
+
+  if not cyanRunning then
+    return
+  end
+
+  for i, view in ipairs(cyanViews) do
+    if view then
+
+      if i == cyanIndex then
+        view.setAlpha(1.0)
+      else
+        view.setAlpha(0.10)
+      end
+
+    end
+  end
+
+  cyanIndex = cyanIndex + 1
+
+  if cyanIndex > #cyanViews then
+    cyanIndex = 1
+  end
+
+  cyanHandler.postDelayed(cyanLoop, 180)
+end
+
+cyanLoop()
+
+-- =========================================================
 -- TAB INDICATOR
 -- 125dp = bawat tab
 -- 85dp  = cyan line
