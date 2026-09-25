@@ -113,100 +113,6 @@ end
 win_menu = loadlayout(floating)
 win_icon = loadlayout(icon)
 
--- =========================================================
--- KAZE CYAN MENU BORDER
--- =========================================================
-
-if menufloating then
-
-  local border = GradientDrawable()
-  border.setColor(0xFF071318)
-  border.setCornerRadius(20 * dens)
-  border.setStroke(2, 0xFF00FFEE)
-
-  menufloating.setBackground(border)
-
-end
--- =========================================================
--- KAZEHAYAMODZ ROTATING CYAN HEADER LIGHT
--- =========================================================
-
-local function startHeaderGlow()
-
-  if not headerCard then
-    return
-  end
-
-  local colors = int{
-    0x0000FFEE,
-    0xFF00FFEE,
-    0xFF00BBD4,
-    0x0000FFEE
-  }
-
-  local matrix = Matrix()
-
-  local glowAnimator = ValueAnimator.ofFloat(float{0, 360})
-
-  glowAnimator.setDuration(3200)
-  glowAnimator.setRepeatCount(ValueAnimator.INFINITE)
-  glowAnimator.setInterpolator(AccelerateDecelerateInterpolator())
-
-  glowAnimator.addUpdateListener(
-    ValueAnimator.AnimatorUpdateListener{
-
-      onAnimationUpdate = function(anim)
-
-        local angle = anim.getAnimatedValue()
-
-        local w = headerCard.getWidth()
-        local h = headerCard.getHeight()
-
-        if w > 0 and h > 0 then
-
-          local gradient =
-            SweepGradient(
-              w / 2,
-              h / 2,
-              colors,
-              nil
-            )
-
-          matrix.setRotate(
-            angle,
-            w / 2,
-            h / 2
-          )
-
-          gradient.setLocalMatrix(matrix)
-
-          local drawable =
-            GradientDrawable()
-
-          drawable.setColor(0xFF08151D)
-          drawable.setCornerRadius(22 * dens)
-          drawable.setStroke(3, 0xFF00FFEE)
-
-          headerCard.setBackground(drawable)
-
-          headerGlow.setAlpha(
-            0.55 + (math.sin(angle * math.pi / 180) * 0.35)
-          )
-
-        end
-
-      end
-    }
-  )
-
-  glowAnimator.start()
-
-end
-
-task(250, function()
-  startHeaderGlow()
-end)
-
 task(1000, function()
   if announcement_title then
     syncAnnouncement()
@@ -525,184 +431,23 @@ end
 local ac, ic = 0xFF00FFEE, 0xFF888888
 local dens = activity.getResources().getDisplayMetrics().density
 
--- =========================================================
--- TAB INDICATOR
--- 125dp = bawat tab
--- 85dp  = cyan line
--- 20dp  = automatic side spacing
--- =========================================================
-
-local TAB_LINE_WIDTH = 85 * dens
-
-local function moveTabIndicator(tab)
-
-  if not tab_indicator or not tab then
-    return
-  end
-
-  local tabWidth = tab.getWidth()
-  local tabX = tab.getLeft()
-
-  if tabWidth <= 0 then
-    return
-  end
-
-  local indicatorX =
-    tabX + ((tabWidth - TAB_LINE_WIDTH) / 2)
-
-  tab_indicator.setTranslationX(indicatorX)
-
-end
-
 local function rTabs()
-
-  local inactive = 0xFF64747D
-  local active = 0xFF00FFEE
-
   if page_1 then page_1.setVisibility(8) end
   if page_2 then page_2.setVisibility(8) end
   if page_3 then page_3.setVisibility(8) end
   if page_4 then page_4.setVisibility(8) end
 
-  if txt_tab1 then txt_tab1.setTextColor(inactive) end
-  if txt_tab2 then txt_tab2.setTextColor(inactive) end
-  if txt_tab3 then txt_tab3.setTextColor(inactive) end
-  if txt_tab4 then txt_tab4.setTextColor(inactive) end
-
-  if tab1_icon then tab1_icon.setTextColor(inactive) end
-  if tab2_icon then tab2_icon.setTextColor(inactive) end
-  if tab3_icon then tab3_icon.setTextColor(inactive) end
-  if tab4_icon then tab4_icon.setTextColor(inactive) end
-
-  if tab1 then
-    tab1.setBackgroundColor(0x00000000)
-  end
-
-  if tab2 then
-    tab2.setBackgroundColor(0x00000000)
-  end
-
-  if tab3 then
-    tab3.setBackgroundColor(0x00000000)
-  end
-
-  if tab4 then
-    tab4.setBackgroundColor(0x00000000)
-  end
-
+  if txt_tab1 then txt_tab1.setTextColor(ic) end
+  if txt_tab2 then txt_tab2.setTextColor(ic) end
+  if txt_tab3 then txt_tab3.setTextColor(ic) end
+  if txt_tab4 then txt_tab4.setTextColor(ic) end
 end
 
+function switchTab1() rTabs(); if page_1 then page_1.setVisibility(0) end; if txt_tab1 then txt_tab1.setTextColor(ac) end; if tab_indicator then tab_indicator.setTranslationX(0) end end
+function switchTab2() rTabs(); if page_2 then page_2.setVisibility(0) end; if txt_tab2 then txt_tab2.setTextColor(ac) end; if tab_indicator then tab_indicator.setTranslationX(85*dens) end end
+function switchTab3() rTabs(); if page_3 then page_3.setVisibility(0) end; if txt_tab3 then txt_tab3.setTextColor(ac) end; if tab_indicator  then tab_indicator.setTranslationX(170*dens) end end
+function switchTab4() rTabs(); if page_4 then page_4.setVisibility(0) end; if txt_tab4 then txt_tab4.setTextColor(ac) end; if tab_indicator then tab_indicator.setTranslationX(255*dens) end end
 
--- =========================================================
--- MAIN
--- =========================================================
-function switchTab1()
-
-  rTabs()
-
-  if page_1 then
-    page_1.setVisibility(0)
-  end
-
-  if txt_tab1 then
-    txt_tab1.setTextColor(0xFF00FFEE)
-  end
-
-  if tab1_icon then
-    tab1_icon.setTextColor(0xFF00FFEE)
-  end
-
-  if tab1 then
-    tab1.setBackgroundColor(0x1420FFFF)
-  end
-
-  moveTabIndicator(tab1)
-
-end
-
-function switchTab2()
-
-  rTabs()
-
-  if page_2 then
-    page_2.setVisibility(0)
-  end
-
-  if txt_tab2 then
-    txt_tab2.setTextColor(0xFF00FFEE)
-  end
-
-  if tab2_icon then
-    tab2_icon.setTextColor(0xFF00FFEE)
-  end
-
-  if tab2 then
-    tab2.setBackgroundColor(0x1420FFFF)
-  end
-
-  moveTabIndicator(tab2)
-
-end
-
-function switchTab3()
-
-  rTabs()
-
-  if page_3 then
-    page_3.setVisibility(0)
-  end
-
-  if txt_tab3 then
-    txt_tab3.setTextColor(0xFF00FFEE)
-  end
-
-  if tab3_icon then
-    tab3_icon.setTextColor(0xFF00FFEE)
-  end
-
-  if tab3 then
-    tab3.setBackgroundColor(0x1420FFFF)
-  end
-
-  moveTabIndicator(tab3)
-
-end
-
-function switchTab4()
-
-  rTabs()
-
-  if page_4 then
-    page_4.setVisibility(0)
-  end
-
-  if txt_tab4 then
-    txt_tab4.setTextColor(0xFF00FFEE)
-  end
-
-  if tab4_icon then
-    tab4_icon.setTextColor(0xFF00FFEE)
-  end
-
-  if tab4 then
-    tab4.setBackgroundColor(0x1420FFFF)
-  end
-
-  moveTabIndicator(tab4)
-
-end
---=========
-task(100, function()
-
-  if tab1 and tab_indicator then
-
-    tab1.post(function()
-      moveTabIndicator(tab1)
-    end)
-
-  end
-
-end)
 
 function antihook()
   function getProcessIdsByPattern(pattern)
@@ -1323,64 +1068,12 @@ ipad_seekbar.setOnSeekBarChangeListener{
 
 }
 
--- =========================================================
--- CONFIG BUTTON CLICK ANIMATION
--- =========================================================
-
-local function animateConfigButton(view)
-
-  if view == nil then
-    return
-  end
-
-  local down = ScaleAnimation(
-    1.0,
-    0.94,
-    1.0,
-    0.94,
-    Animation.RELATIVE_TO_SELF,
-    0.5,
-    Animation.RELATIVE_TO_SELF,
-    0.5
-  )
-
-  down.setDuration(90)
-  down.setFillAfter(true)
-
-
-  local up = ScaleAnimation(
-    0.94,
-    1.0,
-    0.94,
-    1.0,
-    Animation.RELATIVE_TO_SELF,
-    0.5,
-    Animation.RELATIVE_TO_SELF,
-    0.5
-  )
-
-  up.setDuration(120)
-  up.setStartOffset(90)
-
-
-  local animation = AnimationSet(true)
-
-  animation.addAnimation(down)
-  animation.addAnimation(up)
-
-  animation.setFillAfter(false)
-
-  view.startAnimation(animation)
-
-end
 
 -- =========================================================
--- CONFIG BUTTON EVENTS
+-- BUTTON EVENTS
 -- =========================================================
 
 function saveconfig.onClick()
-
-  animateConfigButton(saveconfig)
 
   saveConfig()
 
@@ -1389,8 +1082,6 @@ end
 
 function loadconfig.onClick()
 
-  animateConfigButton(loadconfig)
-
   loadConfig()
 
 end
@@ -1398,11 +1089,11 @@ end
 
 function resetconfig.onClick()
 
-  animateConfigButton(resetconfig)
-
   resetConfig()
 
 end
+
+
 -- =========================================================
 -- SAVE CONFIG
 -- =========================================================
