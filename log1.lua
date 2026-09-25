@@ -1789,6 +1789,28 @@ function br.OnCheckedChangeListener()
   end
 end
 
+                ant1.ButtonDrawable.setColorFilter(PorterDuffColorFilter(0xFF00FFEE, PorterDuff.Mode.SRC_ATOP)) -- Unknown offset
+                function ant1.OnCheckedChangeListener()
+                  if ant1.checked then
+                    cppPatch("nigga", "0900")
+                    if ant3 then ant3.setChecked(false) end
+                    idkcstmToast("RED ANTENNA ACTIVATED")
+                    speakText("RED ANTENNA ACTIVATED")
+                  end
+                end
+              end
+              
+                ant3.ButtonDrawable.setColorFilter(PorterDuffColorFilter(0xFF00FFEE, PorterDuff.Mode.SRC_ATOP)) -- Unknown offset
+                function ant3.OnCheckedChangeListener()
+                  if ant3.checked then
+                    cppPatch("nigga", "0904")
+                    if ant1 then ant1.setChecked(false) end
+                    idkcstmToast("BLACK ANTENNA ACTIVATED")
+                    speakText("BLACK ANTENNA ACTIVATED")
+                  end
+                end
+end
+
 nos.ButtonDrawable.setColorFilter(PorterDuffColorFilter(0xFF00FFEE, PorterDuff.Mode.SRC_ATOP))
 function nos.OnCheckedChangeListener()
   if nos.checked then
