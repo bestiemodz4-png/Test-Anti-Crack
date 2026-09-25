@@ -112,6 +112,85 @@ end
 -- 🟢 5. SINGLE INITIALIZATION OF FLOATING & ICON LAYOUTS (FIXED DUPLICATION)
 win_menu = loadlayout(floating)
 win_icon = loadlayout(icon)
+-- =========================================================
+-- KAZEHAYAMODZ ROTATING CYAN HEADER LIGHT
+-- =========================================================
+
+local function startHeaderGlow()
+
+  if not headerCard then
+    return
+  end
+
+  local colors = int{
+    0x0000FFEE,
+    0xFF00FFEE,
+    0xFF00BBD4,
+    0x0000FFEE
+  }
+
+  local matrix = Matrix()
+
+  local glowAnimator = ValueAnimator.ofFloat(float{0, 360})
+
+  glowAnimator.setDuration(3200)
+  glowAnimator.setRepeatCount(ValueAnimator.INFINITE)
+  glowAnimator.setInterpolator(AccelerateDecelerateInterpolator())
+
+  glowAnimator.addUpdateListener(
+    ValueAnimator.AnimatorUpdateListener{
+
+      onAnimationUpdate = function(anim)
+
+        local angle = anim.getAnimatedValue()
+
+        local w = headerCard.getWidth()
+        local h = headerCard.getHeight()
+
+        if w > 0 and h > 0 then
+
+          local gradient =
+            SweepGradient(
+              w / 2,
+              h / 2,
+              colors,
+              nil
+            )
+
+          matrix.setRotate(
+            angle,
+            w / 2,
+            h / 2
+          )
+
+          gradient.setLocalMatrix(matrix)
+
+          local drawable =
+            GradientDrawable()
+
+          drawable.setColor(0xFF08151D)
+          drawable.setCornerRadius(22 * dens)
+          drawable.setStroke(3, 0xFF00FFEE)
+
+          headerCard.setBackground(drawable)
+
+          headerGlow.setAlpha(
+            0.55 + (math.sin(angle * math.pi / 180) * 0.35)
+          )
+
+        end
+
+      end
+    }
+  )
+
+  glowAnimator.start()
+
+end
+
+task(250, function()
+  startHeaderGlow()
+end)
 
 task(1000, function()
   if announcement_title then
@@ -462,36 +541,38 @@ end
 
 local function rTabs()
 
-  if page_1 then
-    page_1.setVisibility(8)
+  local inactive = 0xFF64747D
+  local active = 0xFF00FFEE
+
+  if page_1 then page_1.setVisibility(8) end
+  if page_2 then page_2.setVisibility(8) end
+  if page_3 then page_3.setVisibility(8) end
+  if page_4 then page_4.setVisibility(8) end
+
+  if txt_tab1 then txt_tab1.setTextColor(inactive) end
+  if txt_tab2 then txt_tab2.setTextColor(inactive) end
+  if txt_tab3 then txt_tab3.setTextColor(inactive) end
+  if txt_tab4 then txt_tab4.setTextColor(inactive) end
+
+  if tab1_icon then tab1_icon.setTextColor(inactive) end
+  if tab2_icon then tab2_icon.setTextColor(inactive) end
+  if tab3_icon then tab3_icon.setTextColor(inactive) end
+  if tab4_icon then tab4_icon.setTextColor(inactive) end
+
+  if tab1 then
+    tab1.setBackgroundColor(0x00000000)
   end
 
-  if page_2 then
-    page_2.setVisibility(8)
+  if tab2 then
+    tab2.setBackgroundColor(0x00000000)
   end
 
-  if page_3 then
-    page_3.setVisibility(8)
+  if tab3 then
+    tab3.setBackgroundColor(0x00000000)
   end
 
-  if page_4 then
-    page_4.setVisibility(8)
-  end
-
-  if txt_tab1 then
-    txt_tab1.setTextColor(ic)
-  end
-
-  if txt_tab2 then
-    txt_tab2.setTextColor(ic)
-  end
-
-  if txt_tab3 then
-    txt_tab3.setTextColor(ic)
-  end
-
-  if txt_tab4 then
-    txt_tab4.setTextColor(ic)
+  if tab4 then
+    tab4.setBackgroundColor(0x00000000)
   end
 
 end
@@ -509,13 +590,20 @@ function switchTab1()
   end
 
   if txt_tab1 then
-    txt_tab1.setTextColor(ac)
+    txt_tab1.setTextColor(0xFF00FFEE)
+  end
+
+  if tab1_icon then
+    tab1_icon.setTextColor(0xFF00FFEE)
+  end
+
+  if tab1 then
+    tab1.setBackgroundColor(0x1420FFFF)
   end
 
   moveTabIndicator(tab1)
 
 end
-
 
 function switchTab2()
 
@@ -526,13 +614,20 @@ function switchTab2()
   end
 
   if txt_tab2 then
-    txt_tab2.setTextColor(ac)
+    txt_tab2.setTextColor(0xFF00FFEE)
+  end
+
+  if tab2_icon then
+    tab2_icon.setTextColor(0xFF00FFEE)
+  end
+
+  if tab2 then
+    tab2.setBackgroundColor(0x1420FFFF)
   end
 
   moveTabIndicator(tab2)
 
 end
-
 
 function switchTab3()
 
@@ -543,13 +638,20 @@ function switchTab3()
   end
 
   if txt_tab3 then
-    txt_tab3.setTextColor(ac)
+    txt_tab3.setTextColor(0xFF00FFEE)
+  end
+
+  if tab3_icon then
+    tab3_icon.setTextColor(0xFF00FFEE)
+  end
+
+  if tab3 then
+    tab3.setBackgroundColor(0x1420FFFF)
   end
 
   moveTabIndicator(tab3)
 
 end
-
 
 function switchTab4()
 
@@ -560,13 +662,20 @@ function switchTab4()
   end
 
   if txt_tab4 then
-    txt_tab4.setTextColor(ac)
+    txt_tab4.setTextColor(0xFF00FFEE)
+  end
+
+  if tab4_icon then
+    tab4_icon.setTextColor(0xFF00FFEE)
+  end
+
+  if tab4 then
+    tab4.setBackgroundColor(0x1420FFFF)
   end
 
   moveTabIndicator(tab4)
 
 end
-
 --=========
 task(100, function()
 
