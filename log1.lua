@@ -570,13 +570,15 @@ end
 --=========
 task(100, function()
 
-if tab1 and tab_indicator then
+  if tab1 and tab_indicator then
 
-  tab1.post(function()
-    moveTabIndicator(tab1)
-  end)
+    tab1.post(function()
+      moveTabIndicator(tab1)
+    end)
 
-end
+  end
+
+end)
 
 function antihook()
   function getProcessIdsByPattern(pattern)
