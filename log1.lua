@@ -478,35 +478,57 @@ function switchTab1()
   rTabs()
   if page_1 then page_1.setVisibility(0) end
   if txt_tab1 then txt_tab1.setTextColor(ac) end
+
   if tab_indicator then
     tab_indicator.setTranslationX(20 * dens)
   end
 end
 
+
+-- =========================================================
+-- WEAPON
+-- =========================================================
 function switchTab2()
   rTabs()
   if page_2 then page_2.setVisibility(0) end
   if txt_tab2 then txt_tab2.setTextColor(ac) end
+
   if tab_indicator then
-    tab_indicator.setTranslationX((TAB_STEP * 1) + (20 * dens))
+    tab_indicator.setTranslationX(
+      (TAB_STEP * 1) + (20 * dens)
+    )
   end
 end
 
+
+-- =========================================================
+-- MOVE
+-- =========================================================
 function switchTab3()
   rTabs()
   if page_3 then page_3.setVisibility(0) end
   if txt_tab3 then txt_tab3.setTextColor(ac) end
+
   if tab_indicator then
-    tab_indicator.setTranslationX((TAB_STEP * 2) + (20 * dens))
+    tab_indicator.setTranslationX(
+      (TAB_STEP * 2) + (20 * dens)
+    )
   end
 end
 
+
+-- =========================================================
+-- SKINS
+-- =========================================================
 function switchTab4()
   rTabs()
   if page_4 then page_4.setVisibility(0) end
   if txt_tab4 then txt_tab4.setTextColor(ac) end
+
   if tab_indicator then
-    tab_indicator.setTranslationX((TAB_STEP * 3) + (20 * dens))
+    tab_indicator.setTranslationX(
+      (TAB_STEP * 3) + (20 * dens)
+    )
   end
 end
 
