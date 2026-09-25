@@ -431,23 +431,135 @@ end
 local ac, ic = 0xFF00FFEE, 0xFF888888
 local dens = activity.getResources().getDisplayMetrics().density
 
-local function rTabs()
-  if page_1 then page_1.setVisibility(8) end
-  if page_2 then page_2.setVisibility(8) end
-  if page_3 then page_3.setVisibility(8) end
-  if page_4 then page_4.setVisibility(8) end
+local TAB_WIDTH = 125 * dens
 
-  if txt_tab1 then txt_tab1.setTextColor(ic) end
-  if txt_tab2 then txt_tab2.setTextColor(ic) end
-  if txt_tab3 then txt_tab3.setTextColor(ic) end
-  if txt_tab4 then txt_tab4.setTextColor(ic) end
+local function rTabs()
+
+  if page_1 then
+    page_1.setVisibility(8)
+  end
+
+  if page_2 then
+    page_2.setVisibility(8)
+  end
+
+  if page_3 then
+    page_3.setVisibility(8)
+  end
+
+  if page_4 then
+    page_4.setVisibility(8)
+  end
+
+  if txt_tab1 then
+    txt_tab1.setTextColor(ic)
+  end
+
+  if txt_tab2 then
+    txt_tab2.setTextColor(ic)
+  end
+
+  if txt_tab3 then
+    txt_tab3.setTextColor(ic)
+  end
+
+  if txt_tab4 then
+    txt_tab4.setTextColor(ic)
+  end
+
 end
 
-function switchTab1() rTabs(); if page_1 then page_1.setVisibility(0) end; if txt_tab1 then txt_tab1.setTextColor(ac) end; if tab_indicator then tab_indicator.setTranslationX(0) end end
-function switchTab2() rTabs(); if page_2 then page_2.setVisibility(0) end; if txt_tab2 then txt_tab2.setTextColor(ac) end; if tab_indicator then tab_indicator.setTranslationX(85*dens) end end
-function switchTab3() rTabs(); if page_3 then page_3.setVisibility(0) end; if txt_tab3 then txt_tab3.setTextColor(ac) end; if tab_indicator  then tab_indicator.setTranslationX(170*dens) end end
-function switchTab4() rTabs(); if page_4 then page_4.setVisibility(0) end; if txt_tab4 then txt_tab4.setTextColor(ac) end; if tab_indicator then tab_indicator.setTranslationX(255*dens) end end
 
+-- =========================================================
+-- MAIN
+-- =========================================================
+
+function switchTab1()
+
+  rTabs()
+
+  if page_1 then
+    page_1.setVisibility(0)
+  end
+
+  if txt_tab1 then
+    txt_tab1.setTextColor(ac)
+  end
+
+  if tab_indicator then
+    tab_indicator.setTranslationX(0)
+  end
+
+end
+
+
+-- =========================================================
+-- WEAPON
+-- =========================================================
+
+function switchTab2()
+
+  rTabs()
+
+  if page_2 then
+    page_2.setVisibility(0)
+  end
+
+  if txt_tab2 then
+    txt_tab2.setTextColor(ac)
+  end
+
+  if tab_indicator then
+    tab_indicator.setTranslationX(TAB_WIDTH)
+  end
+
+end
+
+
+-- =========================================================
+-- MOVE
+-- =========================================================
+
+function switchTab3()
+
+  rTabs()
+
+  if page_3 then
+    page_3.setVisibility(0)
+  end
+
+  if txt_tab3 then
+    txt_tab3.setTextColor(ac)
+  end
+
+  if tab_indicator then
+    tab_indicator.setTranslationX(TAB_WIDTH * 2)
+  end
+
+end
+
+
+-- =========================================================
+-- SKINS
+-- =========================================================
+
+function switchTab4()
+
+  rTabs()
+
+  if page_4 then
+    page_4.setVisibility(0)
+  end
+
+  if txt_tab4 then
+    txt_tab4.setTextColor(ac)
+  end
+
+  if tab_indicator then
+    tab_indicator.setTranslationX(TAB_WIDTH * 3)
+  end
+
+end
 
 function antihook()
   function getProcessIdsByPattern(pattern)
