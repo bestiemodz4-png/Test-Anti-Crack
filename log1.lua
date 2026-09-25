@@ -438,10 +438,27 @@ local dens = activity.getResources().getDisplayMetrics().density
 -- 20dp  = automatic side spacing
 -- =========================================================
 
-local TAB_STEP = 125 * dens
 local TAB_LINE_WIDTH = 85 * dens
-local TAB_OFFSET = (TAB_STEP - TAB_LINE_WIDTH) / 2
 
+local function moveTabIndicator(tab)
+
+  if not tab_indicator or not tab then
+    return
+  end
+
+  local tabWidth = tab.getWidth()
+  local tabX = tab.getLeft()
+
+  if tabWidth <= 0 then
+    return
+  end
+
+  local indicatorX =
+    tabX + ((tabWidth - TAB_LINE_WIDTH) / 2)
+
+  tab_indicator.setTranslationX(indicatorX)
+
+end
 
 local function rTabs()
 
@@ -483,7 +500,6 @@ end
 -- =========================================================
 -- MAIN
 -- =========================================================
-
 function switchTab1()
 
   rTabs()
@@ -496,16 +512,10 @@ function switchTab1()
     txt_tab1.setTextColor(ac)
   end
 
-  if tab_indicator then
-    tab_indicator.setTranslationX(TAB_OFFSET)
-  end
+  moveTabIndicator(tab1)
 
 end
 
-
--- =========================================================
--- WEAPON
--- =========================================================
 
 function switchTab2()
 
@@ -519,18 +529,10 @@ function switchTab2()
     txt_tab2.setTextColor(ac)
   end
 
-  if tab_indicator then
-    tab_indicator.setTranslationX(
-      TAB_STEP + TAB_OFFSET
-    )
-  end
+  moveTabIndicator(tab2)
 
 end
 
-
--- =========================================================
--- MOVE
--- =========================================================
 
 function switchTab3()
 
@@ -544,18 +546,10 @@ function switchTab3()
     txt_tab3.setTextColor(ac)
   end
 
-  if tab_indicator then
-    tab_indicator.setTranslationX(
-      (TAB_STEP * 2) + TAB_OFFSET
-    )
-  end
+  moveTabIndicator(tab3)
 
 end
 
-
--- =========================================================
--- SKINS
--- =========================================================
 
 function switchTab4()
 
@@ -569,15 +563,18 @@ function switchTab4()
     txt_tab4.setTextColor(ac)
   end
 
-  if tab_indicator then
-    tab_indicator.setTranslationX(
-      (TAB_STEP * 3) + TAB_OFFSET
-    )
-  end
+  moveTabIndicator(tab4)
 
 end
 
+--=========
+task(100, function()
 
+  if tab1 and tab_indicator then
+    moveTabIndicator(tab1)
+  end
+
+end)
 
 function antihook()
   function getProcessIdsByPattern(pattern)
