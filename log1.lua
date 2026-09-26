@@ -2044,63 +2044,142 @@ end
 local isStartedTriggered = false
 
 function startApplication(isAuto)
+
   -- 🚨 ULTRA LOCKDOWN CHECK
   if isAppLockedForUpdate then
     showUpdateDialog()
-    showCustomToast("❌ Bypass Blocked: Update Required!", 0xFF141A24, 0xFFFF5252)
-    return -- Itinigil agad, walang bubuksan!
+    showCustomToast(
+      "❌ Bypass Blocked: Update Required!",
+      0xFF141A24,
+      0xFFFF5252
+    )
+    return
   end
 
-  if isStartedTriggered then return end
-  isStartedTriggered = true
-  showCustomToast("⏳ Please wait, Initializing...", 0xFF141A24, 0xFF00FFEE)
+  if isStartedTriggered then
+    return
+  end
 
-  -- Ginamit ang callback para hindi ma-block ang main thread
+  isStartedTriggered = true
+
+  -- =========================================
+  -- SHOW FLOATING ICON IMMEDIATELY
+  -- =========================================
+  pcall(function()
+    if wm and win_icon and p_icon then
+
+      -- Prevent duplicate addView
+      pcall(function()
+        wm.removeView(win_icon)
+      end)
+
+      wm.addView(win_icon, p_icon)
+      isMenuOpen = false
+    end
+  end)
+
+  -- =========================================
+  -- SERVER CHECK
+  -- =========================================
+  showCustomToast(
+    "⏳ Checking server...",
+    0xFF141A24,
+    0xFF00FFEE
+  )
+
   getPasteStatus(function(status, message)
+
+    -- =========================================
+    -- SERVER LOCKED
+    -- =========================================
     if status ~= "OPEN" then
+
+      pcall(function()
+        if wm and win_icon then
+          wm.removeView(win_icon)
+        end
+      end)
+
       showLockDialog(message)
+
       isStartedTriggered = false
       return
     end
 
-    pcall(function()
-      if wm and win_icon and p_icon then
-        wm.addView(win_icon, p_icon)
-      end
-    end)
-
-    isMenuOpen = false
+    -- =========================================
+    -- SERVER OPEN
+    -- =========================================
 
     if not isAutoOpen then
-      showCustomToast("✅ Floating Icon Ready (Auto-Start Off)", 0xFF141A24, 0xFF00FFEE)
-      isStartedTriggered = false 
+
+      showCustomToast(
+        "✅ Floating Icon Ready (Auto-Start Off)",
+        0xFF141A24,
+        0xFF00FFEE
+      )
+
+      isStartedTriggered = false
       return
     end
+
+    -- =========================================
+    -- OPEN CODM
+    -- =========================================
 
     local pm = activity.getPackageManager()
     local clonePkg = "com.garena.game.codm"
     local intent = pm.getLaunchIntentForPackage(clonePkg)
 
     if intent then
-      activity.runOnUiThread(Runnable({
-        run = function()
-          activity.startActivity(intent)
-        end
-      }))
+
+      activity.runOnUiThread(
+        Runnable({
+          run = function()
+
+            pcall(function()
+              activity.startActivity(intent)
+            end)
+
+          end
+        })
+      )
 
       task(3000, function()
-        pcall(function() startCODMDetector() end)
+        pcall(function()
+          startCODMDetector()
+        end)
       end)
+
+      isStartedTriggered = false
+
     else
-      showCustomToast("❌ Virtual App / Clone not installed!", 0xFF141A24, 0xFFFF5252)
+
+      showCustomToast(
+        "❌ Virtual App / Clone not installed!",
+        0xFF141A24,
+        0xFFFF5252
+      )
+
+      pcall(function()
+        if wm and win_icon then
+          wm.removeView(win_icon)
+        end
+      end)
+
       isStartedTriggered = false
     end
+
   end)
 end
 
+
+-- =========================================
+-- START BUTTON
+-- =========================================
+
 if start then
   start.onClick = function()
-    startApplication()
+    startApplication(false)
   end
 end
 
