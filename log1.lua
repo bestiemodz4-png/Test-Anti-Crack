@@ -2313,9 +2313,9 @@ startupDebug("BEFORE memory")
 require "memory"
 startupDebug("AFTER memory")
 
-startupDebug("BEFORE log1")
-require "log1"
-startupDebug("AFTER log1")
+-- DISABLED FOR TEST
+-- require "log1"
+startupDebug("log1 DISABLED")
 
 startupDebug("BEFORE ProgressDialog")
 import "android.app.ProgressDialog"
