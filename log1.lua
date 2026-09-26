@@ -2179,16 +2179,15 @@ end
 if start then
   start.onClick = function()
 
-    showCustomToast(
-      "🟢 START CLICKED",
-      0xFF141A24,
-      0xFF00FFEE
-    )
+    pcall(function()
+      if wm and win_icon and p_icon then
 
-    task(50, function()
-      pcall(function()
-        startApplication(isAutoOpen)
-      end)
+        if win_icon.getParent() == nil then
+          wm.addView(win_icon, p_icon)
+        end
+
+        isMenuOpen = false
+      end
     end)
 
   end
