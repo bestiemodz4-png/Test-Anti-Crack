@@ -2237,26 +2237,37 @@ end
 -- =========================================
 if start then
   start.onClick = function()
-    startupDebug("START CLICKED")
+
+    startupDebug("========== START PRESSED ==========")
+
+    startupDebug("START: BEFORE addView")
 
     pcall(function()
       if wm and win_icon and p_icon then
 
-        startupDebug("BEFORE wm.addView")
-
         if win_icon.getParent() == nil then
           wm.addView(win_icon, p_icon)
+          startupDebug("START: addView DONE")
+        else
+          startupDebug("START: icon ALREADY attached")
         end
 
-        startupDebug("AFTER wm.addView")
-
-        isMenuOpen = false
+      else
+        startupDebug("START: wm/win_icon/p_icon MISSING")
       end
     end)
+
+    startupDebug("START: AFTER addView")
+
+    -- force UI redraw
+    if activity and activity.getWindow() then
+      activity.getWindow().getDecorView().post(function()
+        startupDebug("START: UI POST EXECUTED")
+      end)
+    end
+
   end
 end
-
-startupDebug("START LISTENER REGISTERED")
 
 local watermarkEnabled = true
 
