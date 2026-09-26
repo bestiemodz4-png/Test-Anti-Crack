@@ -702,6 +702,7 @@ local configSwitches = {
   "Judgement",
   "Rictus",
   "argus",
+  "F286",
 
   -- =========================================================
   -- CHARACTERS
