@@ -242,7 +242,7 @@ local function applyRainbowBorder(view)
   animator.start()
 end
 
-if iconf then applyRainbowBorder(iconf) end
+--if iconf then applyRainbowBorder(iconf) end
 
 -- 🟢 7. IDLE BLUR SYSTEM
 local idleRunnable = Runnable({
