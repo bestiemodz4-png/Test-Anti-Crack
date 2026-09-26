@@ -1,58 +1,4 @@
--- =========================================================
--- STARTUP DEBUG / PROFILER
--- =========================================================
-
-local STARTUP_DEBUG = true
-local startupTime = os.clock()
-
-local function startupDebug(label)
-  if not STARTUP_DEBUG then return end
-
-  local elapsed = os.clock() - startupTime
-  local msg = string.format("[STARTUP %.3fs] %s", elapsed, tostring(label))
-
-  print(msg)
-
-  pcall(function()
-    local path = activity.getLuaDir() .. "/startup_debug.txt"
-    local f = io.open(path, "a")
-    if f then
-      f:write(msg .. "\n")
-      f:close()
-    end
-  end)
-end
-
-startupDebug("MAIN LUA START")
-
 require "import"
-startupDebug("require import DONE")
-
-pcall(function()
-  import "http"
-end)
-startupDebug("http import DONE")
-
-import "android.app.*"
-import "android.os.*"
-import "android.widget.*"
-import "android.view.*"
-import "android.content.*"
-import "android.net.*"
-
-startupDebug("ANDROID IMPORTS DONE")
-
-import "layout"
-startupDebug("layout import DONE")
-
-import "floating"
-startupDebug("floating import DONE")
-
-import "icon"
-startupDebug("icon import DONE")
-
-import "watermarkz"
-startupDebug("watermarkz import DONE")
 
 -- 🟢 1. HTTP MODULE SAFE SETUP
 pcall(function() import "http" end)
@@ -165,10 +111,7 @@ end
 
 -- 🟢 5. SINGLE INITIALIZATION OF FLOATING & ICON LAYOUTS (FIXED DUPLICATION)
 win_menu = loadlayout(floating)
-startupDebug("loadlayout(floating) DONE")
-
 win_icon = loadlayout(icon)
-startupDebug("loadlayout(icon) DONE")
 
 task(1000, function()
   if announcement_title then
@@ -253,7 +196,6 @@ function getProcessId(processName)
 end
 
 local wm = activity.getSystemService(Context.WINDOW_SERVICE)
-startupDebug("WINDOW MANAGER CREATED")
 local idleHandler = Handler()
 local isMenuOpen = false
 
@@ -300,7 +242,7 @@ local function applyRainbowBorder(view)
   animator.start()
 end
 
---if iconf then applyRainbowBorder(iconf) end
+if iconf then applyRainbowBorder(iconf) end
 
 -- 🟢 7. IDLE BLUR SYSTEM
 local idleRunnable = Runnable({
@@ -341,7 +283,6 @@ end
 
 local p_menu = getParams(0, 0)
 local p_icon = getParams(0, 100)
-startupDebug("WINDOW PARAMS CREATED")
 
 -- ==========================================
 -- HIDDEN MENU TRIGGER
@@ -1990,11 +1931,11 @@ function autoBypass()
 end
 
 -- I-load ang bypass nang hindi binibigla ang main thread sa pagsisimula
--- task(1500, function()
---   waitForGameAndLib("libanogs.so", function()
---     autoBypass()
---   end)
--- end)
+task(1500, function()
+  waitForGameAndLib("libanogs.so", function()
+    autoBypass()
+  end)
+end)
 
 -- Kulayan ang mga buttons nang sabay-sabay gamit ang pcall para iwas crash kung may null
 for _, btn in ipairs(masterUiButtons) do
@@ -2103,169 +2044,63 @@ end
 local isStartedTriggered = false
 
 function startApplication(isAuto)
-
   -- 🚨 ULTRA LOCKDOWN CHECK
   if isAppLockedForUpdate then
     showUpdateDialog()
-    showCustomToast(
-      "❌ Bypass Blocked: Update Required!",
-      0xFF141A24,
-      0xFFFF5252
-    )
-    return
+    showCustomToast("❌ Bypass Blocked: Update Required!", 0xFF141A24, 0xFFFF5252)
+    return -- Itinigil agad, walang bubuksan!
   end
 
-  if isStartedTriggered then
-    return
-  end
-
+  if isStartedTriggered then return end
   isStartedTriggered = true
+  showCustomToast("⏳ Please wait, Initializing...", 0xFF141A24, 0xFF00FFEE)
 
-  -- =========================================
-  -- SHOW FLOATING ICON IMMEDIATELY
-  -- =========================================
-  pcall(function()
-    if wm and win_icon and p_icon then
-
-      -- Prevent duplicate addView
-      pcall(function()
-        wm.removeView(win_icon)
-      end)
-
-      wm.addView(win_icon, p_icon)
-      isMenuOpen = false
-    end
-  end)
-
-  -- =========================================
-  -- SERVER CHECK
-  -- =========================================
-  showCustomToast(
-    "⏳ Checking server...",
-    0xFF141A24,
-    0xFF00FFEE
-  )
-
+  -- Ginamit ang callback para hindi ma-block ang main thread
   getPasteStatus(function(status, message)
-
-    -- =========================================
-    -- SERVER LOCKED
-    -- =========================================
     if status ~= "OPEN" then
-
-      pcall(function()
-        if wm and win_icon then
-          wm.removeView(win_icon)
-        end
-      end)
-
       showLockDialog(message)
-
       isStartedTriggered = false
       return
     end
 
-    -- =========================================
-    -- SERVER OPEN
-    -- =========================================
+    pcall(function()
+      if wm and win_icon and p_icon then
+        wm.addView(win_icon, p_icon)
+      end
+    end)
+
+    isMenuOpen = false
 
     if not isAutoOpen then
-
-      showCustomToast(
-        "✅ Floating Icon Ready (Auto-Start Off)",
-        0xFF141A24,
-        0xFF00FFEE
-      )
-
-      isStartedTriggered = false
+      showCustomToast("✅ Floating Icon Ready (Auto-Start Off)", 0xFF141A24, 0xFF00FFEE)
+      isStartedTriggered = false 
       return
     end
-
-    -- =========================================
-    -- OPEN CODM
-    -- =========================================
 
     local pm = activity.getPackageManager()
     local clonePkg = "com.garena.game.codm"
     local intent = pm.getLaunchIntentForPackage(clonePkg)
 
     if intent then
-
-      activity.runOnUiThread(
-        Runnable({
-          run = function()
-
-            pcall(function()
-              activity.startActivity(intent)
-            end)
-
-          end
-        })
-      )
+      activity.runOnUiThread(Runnable({
+        run = function()
+          activity.startActivity(intent)
+        end
+      }))
 
       task(3000, function()
-        pcall(function()
-          startCODMDetector()
-        end)
+        pcall(function() startCODMDetector() end)
       end)
-
-      isStartedTriggered = false
-
     else
-
-      showCustomToast(
-        "❌ Virtual App / Clone not installed!",
-        0xFF141A24,
-        0xFFFF5252
-      )
-
-      pcall(function()
-        if wm and win_icon then
-          wm.removeView(win_icon)
-        end
-      end)
-
+      showCustomToast("❌ Virtual App / Clone not installed!", 0xFF141A24, 0xFFFF5252)
       isStartedTriggered = false
     end
-
   end)
 end
 
-
--- =========================================
--- START BUTTON
--- =========================================
 if start then
   start.onClick = function()
-
-    startupDebug("========== START PRESSED ==========")
-
-    startupDebug("START: BEFORE addView")
-
-    pcall(function()
-      if wm and win_icon and p_icon then
-
-        if win_icon.getParent() == nil then
-          wm.addView(win_icon, p_icon)
-          startupDebug("START: addView DONE")
-        else
-          startupDebug("START: icon ALREADY attached")
-        end
-
-      else
-        startupDebug("START: wm/win_icon/p_icon MISSING")
-      end
-    end)
-
-    startupDebug("START: AFTER addView")
-
-    -- force UI redraw
-    if activity and activity.getWindow() then
-      activity.getWindow().getDecorView().post(function()
-        startupDebug("START: UI POST EXECUTED")
-      end)
-    end
-
+    startApplication()
   end
 end
 
@@ -2316,24 +2151,10 @@ if killgame then killgame.setBackground(bgBtn) end
 if stop then stop.onClick = function() pcall(function() wm.removeView(win_menu) end); pcall(function() wm.removeView(win_icon) end); isMenuOpen = false; os.exit() end end
 if killgame then killgame.onClick = function() pcall(function() wm.removeView(win_menu) end); pcall(function() wm.removeView(win_icon) end); isMenuOpen = false; os.exit() end end
 
-startupDebug("BEFORE video")
 import "video"
-startupDebug("AFTER video")
-
-startupDebug("BEFORE memory")
 require "memory"
-startupDebug("AFTER memory")
-
--- DISABLED FOR TEST
--- require "log1"
-startupDebug("log1 DISABLED")
-
-startupDebug("BEFORE ProgressDialog")
+require "log1"
 import "android.app.ProgressDialog"
-startupDebug("AFTER ProgressDialog")
-
-startupDebug("MAIN LUA FINISHED")
-
 
 if clearCacheBtn then
   clearCacheBtn.onClick = function()
