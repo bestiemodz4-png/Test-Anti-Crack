@@ -635,10 +635,7 @@ local configSwitches = {
   -- =========================================================
   "wall",
   "redhack",
-  "hit",
   "br",
-  "ant1",
-  "ant3",
 
   -- =========================================================
   -- WEAPON MODS
@@ -654,6 +651,7 @@ local configSwitches = {
   -- =========================================================
   "speed",
   "superfastdive",
+  "hit",
 
   -- =========================================================
   -- MOVEMENT
@@ -1671,26 +1669,6 @@ function br.OnCheckedChangeListener()
     HexPatches.MemoryPatch("libunity.so", 0x5985F8C, "h00 00 80 D2 C0 03 5F D6", 32); -- brtags2
   end
 end
-
-                ant1.ButtonDrawable.setColorFilter(PorterDuffColorFilter(0xFF00FFEE, PorterDuff.Mode.SRC_ATOP)) -- Unknown offset
-                function ant1.OnCheckedChangeListener()
-                  if ant1.checked then
-                    cppPatch("nigga", "0900")
-                    if ant3 then ant3.setChecked(false) end
-                    idkcstmToast("RED ANTENNA ACTIVATED")
-                    speakText("RED ANTENNA ACTIVATED")
-                  end
-                end
-              
-                ant3.ButtonDrawable.setColorFilter(PorterDuffColorFilter(0xFF00FFEE, PorterDuff.Mode.SRC_ATOP)) -- Unknown offset
-                function ant3.OnCheckedChangeListener()
-                  if ant3.checked then
-                    cppPatch("nigga", "0904")
-                    if ant1 then ant1.setChecked(false) end
-                    idkcstmToast("BLACK ANTENNA ACTIVATED")
-                    speakText("BLACK ANTENNA ACTIVATED")
-                  end
-                end
 
 nos.ButtonDrawable.setColorFilter(PorterDuffColorFilter(0xFF00FFEE, PorterDuff.Mode.SRC_ATOP))
 function nos.OnCheckedChangeListener()
