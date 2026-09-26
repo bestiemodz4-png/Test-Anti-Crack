@@ -2176,7 +2176,6 @@ end
 -- =========================================
 -- START BUTTON
 -- =========================================
-
 if start then
   start.onClick = function()
 
@@ -2186,14 +2185,10 @@ if start then
       0xFF00FFEE
     )
 
-    pcall(function()
-      if wm and win_icon and p_icon then
-        wm.addView(win_icon, p_icon)
-      end
-    end)
-
-    task(100, function()
-      startApplication(isAutoOpen)
+    task(50, function()
+      pcall(function()
+        startApplication(isAutoOpen)
+      end)
     end)
 
   end
