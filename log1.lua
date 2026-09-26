@@ -2306,28 +2306,23 @@ if stop then stop.onClick = function() pcall(function() wm.removeView(win_menu) 
 if killgame then killgame.onClick = function() pcall(function() wm.removeView(win_menu) end); pcall(function() wm.removeView(win_icon) end); isMenuOpen = false; os.exit() end end
 
 startupDebug("BEFORE video")
-
 import "video"
-
 startupDebug("AFTER video")
 
 startupDebug("BEFORE memory")
-
 require "memory"
-
 startupDebug("AFTER memory")
 
 startupDebug("BEFORE log1")
-
 require "log1"
-
 startupDebug("AFTER log1")
 
+startupDebug("BEFORE ProgressDialog")
 import "android.app.ProgressDialog"
-
 startupDebug("AFTER ProgressDialog")
 
 startupDebug("MAIN LUA FINISHED")
+
 
 if clearCacheBtn then
   clearCacheBtn.onClick = function()
