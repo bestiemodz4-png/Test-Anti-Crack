@@ -1931,11 +1931,11 @@ function autoBypass()
 end
 
 -- I-load ang bypass nang hindi binibigla ang main thread sa pagsisimula
-task(1500, function()
-  waitForGameAndLib("libanogs.so", function()
-    autoBypass()
-  end)
-end)
+-- task(1500, function()
+--   waitForGameAndLib("libanogs.so", function()
+--     autoBypass()
+--   end)
+-- end)
 
 -- Kulayan ang mga buttons nang sabay-sabay gamit ang pcall para iwas crash kung may null
 for _, btn in ipairs(masterUiButtons) do
