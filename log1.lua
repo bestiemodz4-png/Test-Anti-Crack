@@ -126,6 +126,16 @@ task(1000, function()
   end
 end)
 
+function isRootAvailable()
+  local file = io.popen("su -c 'echo root'")
+  if file then
+    local output = file:read("*a")
+    file:close()
+    return output:find("root") ~= nil
+  end
+  return false
+end
+
 HexPatches = {}
 local targetPkg = "com.garena.game.codm"
 
