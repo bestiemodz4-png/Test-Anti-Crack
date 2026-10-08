@@ -126,74 +126,6 @@ task(1000, function()
   end
 end)
 
-function isRootAvailable()
-  local file = io.popen("su -c 'echo root'")
-  if file then
-    local output = file:read("*a")
-    file:close()
-    return output:find("root") ~= nil
-  end
-  return false
-end
-
-HexPatches = {}
-local targetPkg = "com.garena.game.codm"
-
-function showToast(msg)
-  Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
-end
-
-function HexPatches.MemoryPatch(libName, offset, hexBytes)
-  local pid = getProcessId("com.garena.game.codm")
-
-  if not pid then
-    showToast("Error: Cannot find game process")
-    return
-  end
-
-  local mapsPath = "/proc/" .. pid .. "/maps"
-  local memPath = "/proc/" .. pid .. "/mem"
-
-  local startAddr = nil
-  for line in io.lines(mapsPath) do
-    if line:find(libName) then
-      startAddr = tonumber(line:match("^(%x+)-"), 16)
-      break
-    end
-  end
-
-  if not startAddr then
-    showToast("Error: Cannot find game process")
-    return
-  end
-
-  local targetAddr = startAddr + offset
-  local memFile = io.open(memPath, "r+b")
-  if not memFile then
-    showToast("Error: Cannot find game process")
-    return
-  end
-
-  memFile:seek("set", targetAddr)
-  local patchBytes = {}
-  for byte in hexBytes:gmatch("%x%x") do
-    table.insert(patchBytes, string.char(tonumber(byte, 16)))
-  end
-  memFile:write(table.concat(patchBytes))
-  memFile:close()
-end
-
-function floatToHexLE(float)
-  if float == 0 then return "00000000" end
-  local sign = 0; if float < 0 then sign = 1; float = -float end
-  local mantissa, exponent = math.frexp(float)
-  if float == math.huge then return "0000807F" end
-  exponent = exponent + 126
-  mantissa = (mantissa * 2 - 1) * 0x800000
-  local intVal = (sign << 31) | (exponent << 23) | mantissa
-  local hex = string.format("%08X", intVal)
-  return hex:sub(7,8) .. hex:sub(5,6) .. hex:sub(3,4) .. hex:sub(1,2)
-end
 
 function getProcessId(processName)
   local file = io.popen("pgrep -f " .. processName)
@@ -821,26 +753,21 @@ end
 -- GET CHECKBOX STATE
 -- =========================================================
 local function getCheckboxState(view)
-
   if view == nil then
     return nil
   end
-
-
+  
   local ok, result = pcall(function()
     return view.isChecked()
   end)
-
 
   if ok and type(result) == "boolean" then
     return result
   end
 
-
   local ok2, result2 = pcall(function()
     return view.checked
   end)
-
 
   if ok2 and type(result2) == "boolean" then
 
@@ -848,23 +775,17 @@ local function getCheckboxState(view)
   end
   return nil
 end
-
-
 -- =========================================================
 -- APPLY AIMBOT SEEK BAR
 -- =========================================================
 local function applyAimbotSeekbar(progress)
-
   local isVIP = (_G.IsPremiumUser == true)
-
   local finalValue =
     (not isVIP and progress > 100)
     and 100
     or progress
-
   local aimStrength = finalValue * 1.0
   local hexValue = floatToHexLE(aimStrength)
-
 
   HexPatches.MemoryPatch(
     "libunity.so",
@@ -900,16 +821,12 @@ local function applyAimbotSeekbar(progress)
     4
   )
 end
-
-
 -- =========================================================
 -- APPLY SNOWBOARD SEEK BAR
 -- =========================================================
 local function applySnowboardSeekbar(progress)
-
   local snowboardBoost = progress * 1.0
   local hexValue = floatToHexLE(snowboardBoost)
-
 
   HexPatches.MemoryPatch(
     "libunity.so",
@@ -945,15 +862,11 @@ local function applySnowboardSeekbar(progress)
     4
   )
 end
-
-
 -- =========================================================
 -- APPLY DIVEB SEEK BAR
 -- =========================================================
 local function applyDivebSeekbar(progress)
-
   local hex = floatToHexLE(progress * 1.0)
-
 
   HexPatches.MemoryPatch(
     "libunity.so",
@@ -1907,76 +1820,261 @@ local masterUiButtons = {
   F309, F310, F180,
 }
 
--- Non-blocking Game & Lib Checker gamit ang thread/task
-function waitForGameAndLib(libName, callback)
-  local retries = 0
-  local maxRetries = 30
-  local found = false -- Flag para ihinto agad kapag nahanap na
+function isRootAvailable()
+  local file = io.popen("su -c 'echo root'")
+  if file then
+    local output = file:read("*a")
+    file:close()
+    return output:find("root") ~= nil
+  end
+  return false
+end
 
-  local function check()
-    if found then return end
-    
-    local pid = getProcessId("com.garena.game.codm")
-    if pid then
-      pcall(function()
-        for line in io.lines("/proc/" .. pid .. "/maps") do
-          if line:find(libName) and line:find("r.xp") then
-            if not found then
-              found = true
-              if callback then callback() end
-            end
-            return
-          end
-        end
-      end)
-    end
-
-    if not found then
-      retries = retries + 1
-      if retries <= maxRetries then
-        task(2000, check)
+function killGG()
+  local handle = io.popen("ps")
+  local result = handle:read("*a")
+  for lines in result:gmatch("[^\n]*") do
+    if lines:match("(%b[])") then
+      local pid = lines:match("%f[%w_](%d+)%f[%W_]")
+      if pid then
+        os.execute("kill -9 " .. pid)
       end
     end
   end
+  return 0;
+end
 
+
+local HexPatches = {}
+
+function HexPatches.MemoryPatch(libName, offset, hexBytes)
+  pcall(function()
+    local pid = getProcessId("com.garena.game.codm")
+    if not pid then
+      idkcstmToast("❌ CODM process not found")
+      return
+    end
+
+    local mapsPath = "/proc/" .. pid .. "/maps"
+    local memPath = "/proc/" .. pid .. "/mem"
+    local startAddr = nil
+
+    for line in io.lines(mapsPath) do
+      if line:find(libName) and line:find("r.xp") then
+        startAddr = tonumber(line:match("^(%x+)-"), 16)
+        break
+      end
+    end
+
+    if not startAddr then
+      idkcstmToast("❌ Library " .. libName .. " not found")
+      return
+    end
+
+    local patchAddr = startAddr + offset
+    local hex = hexBytes:gsub("h", ""):gsub("%s", "")
+    local bytes = {}
+    for i = 1, #hex, 2 do
+      local byte = tonumber(hex:sub(i, i + 1), 16)
+      if byte then table.insert(bytes, string.char(byte)) end
+    end
+
+    local mem = io.open(memPath, "r+b")
+    if mem then
+      mem:seek("set", patchAddr)
+      mem:write(table.concat(bytes))
+      mem:close()
+     else
+      idkcstmToast("❌ Cannot open mem file. Root required")
+    end
+  end)
+end
+
+function float_to_hex(float)
+  local b = {string.byte(string.pack("f", float), 1, 4)}
+  return string.format("h%02X %02X %02X %02X", b[1], b[2], b[3], b[4])
+end
+
+function getProcessId(name)
+  local f = io.popen("pidof " .. name)
+  if f then
+    local pid = f:read("*n")
+    f:close()
+    return pid
+  end
+end
+
+function logToFile(msg)
+  local log = io.open("/storage/emulated/0/Kaze_Bypass_Log.txt", "a")
+  if log then
+    log:write("[taguro] " .. msg .. "\n")
+    log:close()
+  end
+end
+
+function idkcstmToast(txt)
+  activity.runOnUiThread(function()
+    Toast.makeText(activity, txt, 1).show()
+  end)
+end
+
+function waitForCODM(callback)
+  local retry = 0
+  local function check()
+    local pid = getProcessId("com.garena.game.codm")
+    if pid then
+      logToFile("CODM detected (PID: " .. pid .. ")")
+      callback()
+     else
+      retry = retry + 1
+      if retry > 5 then
+        logToFile("❌ CODM not found after retries")
+        return
+      end
+      Handler().postDelayed(Runnable { run = check }, 2000)
+    end
+  end
   check()
 end
 
--- Global flag para sa bypass execution
-local isBypassExecuted = false
+local HexPatches = {}
 
-function autoBypass()
-  if isBypassExecuted then return end -- Pigilan kung na-run na
-  isBypassExecuted = true -- I-lock na agad
-
+function HexPatches.MemoryPatch(libName, offset, hexBytes)
   pcall(function()
-    HexPatches.MemoryPatch("libanogs.so", 0x202680, "h00 00 80 D2 C0 03 5F D6", 32);
-      HexPatches.MemoryPatch("libanogs.so", 0x204218, "h00 00 80 D2 C0 03 5F D6", 32);
-      HexPatches.MemoryPatch("libanogs.so", 0x35140C, "h00 00 80 D2 C0 03 5F D6", 32);
-      HexPatches.MemoryPatch("libanogs.so", 0x37B5A8, "h00 00 80 D2 C0 03 5F D6", 32);
-      HexPatches.MemoryPatch("libanogs.so", 0x3893D8, "h00 00 80 D2 C0 03 5F D6", 32);
-      HexPatches.MemoryPatch("libanogs.so", 0x39AE94, "h00 00 80 D2 C0 03 5F D6", 32);
-      HexPatches.MemoryPatch("libanogs.so", 0x44A714, "h00 00 80 D2 C0 03 5F D6", 32);
-      HexPatches.MemoryPatch("libanogs.so", 0x44BC90, "h00 00 80 D2 C0 03 5F D6", 32);
-      HexPatches.MemoryPatch("libanogs.so", 0x455A80, "h00 00 80 D2 C0 03 5F D6", 32);
-      HexPatches.MemoryPatch("libanogs.so", 0x48CF20, "h00 00 80 D2 C0 03 5F D6", 32);
-      HexPatches.MemoryPatch("libanogs.so", 0x497244, "h00 00 80 D2 C0 03 5F D6", 32);
-      HexPatches.MemoryPatch("libanogs.so", 0x501210, "h00 00 80 D2 C0 03 5F D6", 32);
-      
-      HexPatches.MemoryPatch("libanogs.so", 0x438154, "h00 00 80 D2 C0 03 5F D6", 32);
-      HexPatches.MemoryPatch("libanogs.so", 0x431D70, "h00 00 80 D2 C0 03 5F D6", 32);
-      HexPatches.MemoryPatch("libanogs.so", 0x48A6B4, "h00 00 80 D2 C0 03 5F D6", 32);
+    local pid = getProcessId("com.garena.game.codm")
+    if not pid then
+      logToFile("❌ CODM process not found")
+      return
+    end
+
+    local mapsPath = "/proc/" .. pid .. "/maps"
+    local memPath = "/proc/" .. pid .. "/mem"
+    local startAddr
+
+    for line in io.lines(mapsPath) do
+      if line:find(libName) and line:find("r.xp") then
+        startAddr = tonumber(line:match("^(%x+)-"), 16)
+        break
+      end
+    end
+
+    if not startAddr then
+      logToFile("❌ Library " .. libName .. " not found")
+      return
+    end
+
+    local patchAddr = startAddr + offset
+    local hex = hexBytes:gsub("h", ""):gsub("%s", "")
+    local bytes = {}
+    for i = 1, #hex, 2 do
+      table.insert(bytes, string.char(tonumber(hex:sub(i, i+1), 16)))
+    end
+
+    local mem = io.open(memPath, "r+b")
+    if mem then
+      mem:seek("set", patchAddr)
+      mem:write(table.concat(bytes))
+      mem:close()
+     else
+      logToFile("❌ Root access required to open memory")
+    end
   end)
-  
-  -- Isang beses na lang lalabas ang Toast na ito
-  showToast("BYPASS ACTIVATED (NEW BYPASS)")
 end
 
--- I-load ang bypass nang hindi binibigla ang main thread sa pagsisimula
-task(1500, function()
-  waitForGameAndLib("libanogs.so", function()
-    autoBypass()
+function getProcessId(pkg)
+  local f = io.popen("pidof " .. pkg)
+  if f then
+    local pid = f:read("*n")
+    f:close()
+    return pid
+  end
+end
+
+function logToFile(msg)
+  local log = io.open("/storage/emulated/0/Taguro_Bypass_Log.txt", "a")
+  if log then
+    log:write("[taguro] " .. msg .. "\n")
+    log:close()
+  end
+end
+
+function waitForGameAndLib(libName, callback)
+  local maxRetries = 15
+  local retries = 0
+
+  local function check()
+    local pid = getProcessId("com.garena.game.codm")
+    if pid then
+      for line in io.lines("/proc/" .. pid .. "/maps") do
+        if line:find(libName) then
+          logToFile("✅ CODM + " .. libName .. " detected")
+          callback()
+          return
+        end
+      end
+    end
+    retries = retries + 1
+    if retries > maxRetries then
+      logToFile("❌ Game or lib not found after retries")
+     else
+      Handler().postDelayed(Runnable { run = check }, 2000)
+    end
+  end
+  check()
+end
+
+
+
+import "android.speech.tts.TextToSpeech"
+
+-- Initialize TTS
+local tts
+tts = TextToSpeech(activity, TextToSpeech.OnInitListener{
+  onInit=function(status)
+    if status == TextToSpeech.SUCCESS then
+      tts.setLanguage(Locale.US)
+    end
+  end
+})
+
+function speak(text)
+  if tts then
+    tts.speak(text, TextToSpeech.QUEUE_FLUSH, nil)
+  end
+end
+
+
+function autoBypass()
+  logToFile(" STARTING KAZE PAID BYPASS...")
+
+  speak("WAIT BYPASS INJECTED")
+
+  local function patch(delay, fn)
+    Handler().postDelayed(Runnable { run = fn }, delay)
+  end
+
+  patch(6000, function()
+    HexPatches.MemoryPatch("libanogs.so", 0x204218, "00 00 80 D2 C0 03 5F D6", 32);
+    HexPatches.MemoryPatch("libanogs.so", 0x438154, "00 00 80 D2 C0 03 5F D6", 32);
+    HexPatches.MemoryPatch("libanogs.so", 0x44A714, "00 00 80 D2 C0 03 5F D6", 32);
+    HexPatches.MemoryPatch("libanogs.so", 0x48CF20, "00 00 80 D2 C0 03 5F D6", 32);
   end)
+
+  patch(7000, function()
+    activity.runOnUiThread(function()
+      idkcstmToast("KAZE ʙʏᴘᴀss sᴜᴄᴄᴇs")
+
+      speak("Auto bypass succes")
+    end)
+    logToFile("Bypassing Injected Successfully.")
+  end)
+end
+
+waitForGameAndLib("libanogs.so", function()
+  logToFile("⏳ Executing bypass after 2s delay")
+  Handler().postDelayed(Runnable {
+    run = autoBypass
+  }, 2000)
 end)
 
 -- Kulayan ang mga buttons nang sabay-sabay gamit ang pcall para iwas crash kung may null
