@@ -1890,9 +1890,16 @@ function HexPatches.MemoryPatch(libName, offset, hexBytes)
   end)
 end
 
-function float_to_hex(float)
-  local b = {string.byte(string.pack("f", float), 1, 4)}
-  return string.format("h%02X %02X %02X %02X", b[1], b[2], b[3], b[4])
+function floatToHexLE(float)
+  if float == 0 then return "00000000" end
+  local sign = 0; if float < 0 then sign = 1; float = -float end
+  local mantissa, exponent = math.frexp(float)
+  if float == math.huge then return "0000807F" end
+  exponent = exponent + 126
+  mantissa = (mantissa * 2 - 1) * 0x800000
+  local intVal = (sign << 31) | (exponent << 23) | mantissa
+  local hex = string.format("%08X", intVal)
+  return hex:sub(7,8) .. hex:sub(5,6) .. hex:sub(3,4) .. hex:sub(1,2)
 end
 
 function getProcessId(name)
